@@ -1,3 +1,6 @@
+require "menu"
+require "omenu"
+
 function love.load()
   love.physics.setMeter(64) 
   world = love.physics.newWorld(0, 9.81*64, true) 
@@ -40,14 +43,53 @@ function love.load()
   objects.player2.body = love.physics.newBody(world, 1500, 900, "static")
   objects.player2.shape = love.physics.newRectangleShape(0, 0, 50, 100)
   objects.player2.fixture = love.physics.newFixture(objects.player2.body, objects.player2.shape, 2)
+  
+  gameBackground = love.graphics.newImage("sprites/cyberpunk-street.png")
+  gamebgQuad = love.graphics.newQuad(1,1,720/2,1280/2,720/2,1280/2)  
+  menuBackground = love.graphics.newImage("sprites/cyberpunk-street.png")
+  menubgQuad = love.graphics.newQuad(1,1,1920,1080,1920,1080)  
+  optionsBackground = love.graphics.newImage("sprites/cyberpunk-street.png")
+  optionsQuad = love.graphics.newQuad(1,1,1920,1080,720/2,1280/2)  
  
   love.graphics.setBackgroundColor(104, 136, 248) 
   love.window.setMode(1920, 1080) 
+  
+  medium = love.graphics.newFont("fonts/wallpoet/Wallpoet-Regular.ttf", 20)
+  big = love.graphics.newFont("fonts/wallpoet/Wallpoet-Regular.ttf", 25)
+  --love.graphics.setColor(1, 1, 1)
+  
+  gamestate = "menu"
+  
+  ---------------Audio---------------
+  backgroundSound = love.audio.newSource("sounds/Background.mp3")
+  volCount = 10
+  -----------------------------------
+  
+  ---------------Menu Buttons---------------
+  button_spawn(140,350,"Start", "start")
+  button_spawn(130,400,"Options", "options")
+  button_spawn(145,450,"Quit", "quit")
+  obutton_spawn(294,300, "Mute", "mute")
+  obutton_spawn(0,300,"Back", "back")
+  obutton_spawn(266,360,"+", "+")
+  obutton_spawn(266,380,"-", "-")
+  ------------------------------------------
 end
 
  
 function love.update(dt)
   world:update(dt) 
+  mousex = love.mouse.getX()
+  mousey = love.mouse.getY() 
+  
+  if gamestate == "menu" then
+    button_check()
+  elseif gamestate == "options" then
+    obutton_check()
+    volume()
+  elseif gamestate == "playing" then
+    game()
+  end
   
   x = objects.player1.body:getX()
   y = objects.player1.body:getY()
@@ -113,4 +155,65 @@ function love.draw()
   love.graphics.setColor(50, 50, 50) 
   love.graphics.polygon("fill", objects.player1.body:getWorldPoints(objects.player1.shape:getPoints()))
   love.graphics.polygon("fill", objects.player2.body:getWorldPoints(objects.player2.shape:getPoints()))
+  
+  -----------------------------
+  if gamestate == "playing" then 
+    gameDraw()
+  elseif gamestate == "menu" then
+    menuDraw()
+  elseif gamestate == "options" then
+    optionsDraw()
+  end
+  -----------------------------
+end
+
+function menuDraw()
+  love.graphics.draw(menuBackground, menubgQuad, 0, 0)
+  button_draw()
+end
+
+function optionsDraw()
+  love.graphics.draw(menuBackground, menubgQuad, 0, 0)
+  obutton_draw()
+end
+
+function gameDraw()
+  love.graphics.draw(menuBackground, menubgQuad, 0, 0)
+  button_draw()
+end
+
+function volume()
+    if volCount == 10 then
+      backgroundSound:setVolume(1.0)
+    elseif volCount == 9 then
+      backgroundSound:setVolume(0.9)
+    elseif volCount == 8 then
+      backgroundSound:setVolume(0.8)
+    elseif volCount == 7 then
+      backgroundSound:setVolume(0.7)
+    elseif volCount == 6 then
+      backgroundSound:setVolume(0.6)
+    elseif volCount == 5 then
+      backgroundSound:setVolume(0.5)
+    elseif volCount == 4 then
+      backgroundSound:setVolume(0.4)
+    elseif volCount == 3 then
+      backgroundSound:setVolume(0.3)
+    elseif volCount == 2 then
+      backgroundSound:setVolume(0.2)
+    elseif volCount == 1 then
+      backgroundSound:setVolume(0.1)
+    elseif volCount == 0 then
+      backgroundSound:setVolume(0.0)
+    end
+end
+
+function love.mousepressed(x,y)
+    if gamestate == "menu" then
+      button_click(x,y)
+    elseif gamestate == "options" then
+      obutton_click(x,y)
+    elseif gamestate == "playing" then
+      
+    end
 end
