@@ -43,6 +43,8 @@ function love.load()
  
   love.graphics.setBackgroundColor(104, 136, 248) 
   love.window.setMode(1920, 1080) 
+  
+  gamestate = "menu"
 end
 
  
@@ -97,6 +99,10 @@ function love.update(dt)
   
   if love.keyboard.isDown("escape") then
     love.event.quit()
+  end
+  
+  if (x < 50) then
+    objects.player1.body:setX(x + 5)
   end
 end
  

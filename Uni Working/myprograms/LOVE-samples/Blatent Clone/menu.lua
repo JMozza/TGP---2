@@ -3,7 +3,7 @@ button = {}
 function button_spawn(x,y,text,id)
     table.insert(button, {x = x, y = y, text = text, id = id, mouseovertext = false})
 end
-  
+
 function button_draw()
   for i,v in ipairs(button) do
     love.graphics.print(v.text,v.x,v.y)
