@@ -1,6 +1,7 @@
 require "menu"
 require "omenu"
 require "game"
+require "gmenu"
 
 function love.load()
   height = love.graphics.getHeight()
@@ -11,7 +12,7 @@ function love.load()
   menuBackground = love.graphics.newImage("sprites/cyberpunk-street.png")
   menubgQuad = love.graphics.newQuad(1,1,1920,1080,1920,1080)  
   optionsBackground = love.graphics.newImage("sprites/cyberpunk-street.png")
-  optionsQuad = love.graphics.newQuad(1,1,1920,1080,720/2,1280/2)  
+  optionsQuad = love.graphics.newQuad(1,1,1920,1080,720/2,1280/2) 
  
   ballTexture = love.graphics.newImage("sprites/ballTexture.png")
   charTexture = love.graphics.newImage("sprites/charTexture.png")
@@ -33,19 +34,33 @@ function love.load()
   
   -- Player 1 Setup (Left)
   player = {}
-  player.width = 23
-  player.height = 32
+  player.width = 107
+  player.height = 149
   player.x = width/3
-  player.y = height - 100
+  player.y = height - 200
   player.speed = 400
+  player.jumpHeight = -500
+  player.ground = player.y
+  player.yVel = 0
+  player.gravity = -500
 
   -- Player 2 Setup (Right)
   player2 = {}
-  player2.width = 23
-  player2.height = 32
+  player2.width = 107
+  player2.height = 149
   player2.x = width/4
-  player2.y = height - 100
+  player2.y = height - 200
   player2.speed = 400
+  player2.jumpHeight = -500
+  player2.ground = player.y
+  player2.yVel = 0
+  player2.gravity = -500
+  
+  platform = {}
+  platform.width = width
+  platform.height = 5
+  platform.x = 0
+  platform.y = height - 100
   
   -- Ball Setup
   ball = {}
@@ -63,6 +78,8 @@ function love.load()
   obutton_spawn(0,300,"Back", "back")
   obutton_spawn(266,360,"+", "+")
   obutton_spawn(266,380,"-", "-")
+  gbutton_spawn(width/2,360,"Restart", "restart")
+  gbutton_spawn(width/2,380,"Menu", "mmenu")
   ------------------------------------------
 end
  
@@ -72,13 +89,19 @@ function love.update(dt)
   
   if gamestate == "menu" then
     button_check()
+    backgroundSound:play()
   elseif gamestate == "options" then
     obutton_check()
+    backgroundSound:play()
     volume()
+  elseif gamestate == "gameover" then
+    gbutton_check()
+    backgroundSound:play()
   end
   
   if (gamestate == "playing") then
     gameUpdate(dt)
+    backgroundSound:play()
     controls(dt)
   end
   
@@ -93,21 +116,38 @@ function love.update(dt)
     love.event.quit()
   end
   
-  --if (player.x < 50) then
-    
-  --end
+  if (player.x <= 5) then
+    player.x = player.x + 5
+  end
   
-  --if (player.x > 1000) then
-    
-  --end
+  if (player.x >= width) then
+    player.x = player.x - 5
+  end
   
-  --if (player.y < 50) then
-    
-  --end
+  if (player.y <= 5) then
+    player.x = player.x + 5
+  end
   
-  --if (player.y > 1900) then
-    
-  --end
+  if (player.y >= height) then
+    player.x = player.x - 5
+  end
+  
+  if (player2.x <= 5) then
+    player2.x = player2.x + 5
+  end
+  
+  if (player2.x >= width) then
+    player2.x = player2.x - 5
+  end
+  
+  if (player2.y <= 5) then
+    player2.y = player2.y + 5
+  end
+  
+  if (player2.y >= height) then
+    player2.y = player2.y - 5
+  end
+  
 end
  
 function love.draw()
@@ -121,6 +161,9 @@ function love.draw()
     menuDraw()
   elseif gamestate == "options" then
     optionsDraw()
+  end
+  if gamestate == "gameover" then
+    gameoverDraw()
   end
   -----------------------------
 end
@@ -137,6 +180,12 @@ end
 
 function gameDraw()
   love.graphics.draw(gameBackground, gamebgQuad, 0, 0)
+end
+
+function gameoverDraw()
+  love.graphics.draw(menuBackground, menubgQuad, 0, 0)
+  love.graphics.print("Game Over", 100, 100)
+  gbutton_draw()
 end
 
 function volume()
@@ -170,7 +219,7 @@ function love.mousepressed(x,y)
       button_click(x,y)
     elseif gamestate == "options" then
       obutton_click(x,y)
-    elseif gamestate == "playing" then
-      
+    elseif gamestate == "gameover" then
+      gbutton_click(x,y)
     end
 end

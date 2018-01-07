@@ -11,45 +11,15 @@ end
 
 function gameUpdate(dt)
   -- Hitbox between player 1 and ball
-  if ball.y >= player.y and ball.y <= height and ball.x >= player.x and
-    ball.x <= (player.x + player.width) then
-    --blockBounce:play()
-    if ball.x >= player.x and ball.x < (player.x + 10) then
-      ball.direction = "dll"
-    elseif ball.x >= (player.x + 15) and ball.x < (player.x + 25) then
-      ball.direction = "dl"
-    elseif ball.x >= (player.x + 30) and ball.x < (player.x + 40) then
-      ball.direction = "ddl"
-    elseif ball.x >= (player.x + 45) and ball.x < (player.x + 55) then
-      ball.direction = "dl"
-    elseif ball.x >= (player.x + 60) and ball.x < (player.x + 70) then
-      ball.direction = "ddr"
-    elseif ball.x >= (player.x + 75) and ball.x < (player.x + 85) then
-      ball.direction = "dr"
-    elseif ball.x >= (player.x + 90) and ball.x < (player.x + 100) then
-      ball.direction = "drr"
-    end
+  if (ball.x <= player.x + player.width) and (ball.y >= player.y + player.height) then
+    --death:play()
+    gamestate = "gameover"
   end
   
   -- Hitbox between player 2 and ball
-  if ball.y <= player2.y and ball.y <= height and ball.x >= player2.x and
-    ball.x <= (player2.x + player2.width) then
-    --blockBounce:play()
-    if ball.x >= player2.x and ball.x < (player2.x + 10) then
-      ball.direction = "uur"
-    elseif ball.x >= (player2.x + 15) and ball.x < (player2.x + 25) then
-      ball.direction = "ur"
-    elseif ball.x >= (player2.x + 30) and ball.x < (player2.x + 40) then
-      ball.direction = "urr"
-    elseif ball.x >= (player2.x + 45) and ball.x < (player2.x + 55) then
-      ball.direction = "ur"
-    elseif ball.x >= (player2.x + 60) and ball.x < (player2.x + 70) then
-      ball.direction = "uul"
-    elseif ball.x >= (player2.x + 75) and ball.x < (player2.x + 85) then
-      ball.direction = "ul"
-    elseif ball.x >= (player2.x + 90) and ball.x < (player2.x + 100) then
-      ball.direction = "ull"
-    end
+  if (ball.x <= player2.x + player2.width) and (ball.y >= player2.y + player2.height) then
+    --death:play()
+    gamestate = "gameover"
   end
   
   -- Wall Bounce
@@ -158,7 +128,39 @@ function controls(dt)
   elseif love.keyboard.isDown("a") then
     player2.x = player2.x - (dt * player2.speed) 
   end
-    
+  
+  if love.keyboard.isDown("m") then
+    if player.yVel == 0 then
+      player.yVel = player.jumpHeight
+    end
+  end
+  
+  if player.yVel ~= 0 then
+		player.y = player.y + player.yVel * dt
+		player.yVel = player.yVel - player.gravity * dt
+	end
+  
+  if player.y > player.ground then
+		player.yVel = 0
+    	player.y = player.ground
+	end
+  
+  if love.keyboard.isDown("space") then
+    if player2.yVel == 0 then
+      player2.yVel = player2.jumpHeight
+    end
+  end
+  
+  if player2.yVel ~= 0 then
+		player2.y = player2.y + player2.yVel * dt
+		player2.yVel = player2.yVel - player2.gravity * dt
+	end
+  
+  if player2.y > player2.ground then
+		player2.yVel = 0
+    	player2.y = player2.ground
+	end
+  
   if player.x <= 0 then
     player.x = player.x + (dt * player.speed)
   elseif player.x + player.width >= width then
@@ -173,21 +175,43 @@ function controls(dt)
 end
 
 function reLoad()
-  player.width = 90
-  player.height = 12
-  player.x = width/2 - player.width/2
-  player.y = 620
-  player.speed = 400
-
-  player2.width = 90
-  player2.height = 12
-  player2.x = width/2 - player2.width/2
-  player2.y = 20
-  player2.speed = 400
+  gamestate = "playing"
   
+  -- Player 1 Setup (Left)
+  player = {}
+  player.width = 107
+  player.height = 149
+  player.x = width/3
+  player.y = height - 200
+  player.speed = 400
+  player.jumpHeight = -500
+  player.ground = player.y
+  player.yVel = 0
+  player.gravity = -500
+
+  -- Player 2 Setup (Right)
+  player2 = {}
+  player2.width = 107
+  player2.height = 149
+  player2.x = width/4
+  player2.y = height - 200
+  player2.speed = 400
+  player2.jumpHeight = -500
+  player2.ground = player.y
+  player2.yVel = 0
+  player2.gravity = -500
+  
+  platform = {}
+  platform.width = width
+  platform.height = 5
+  platform.x = 0
+  platform.y = height - 100
+  
+  -- Ball Setup
+  ball = {}
   ball.radius = 10
   ball.x = width/2
-  ball.y = 540
+  ball.y = height/2
   ball.speed = 100
-  ball.direction = "d"
+  ball.direction = "dl"
 end
